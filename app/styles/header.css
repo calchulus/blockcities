@@ -1,0 +1,30 @@
+.userAvatar { 
+/* bb_PA-2133-small */
+
+position: absolute;
+width: 50px;
+height: 50px;
+left: 182px;
+top: 11px;
+
+/*background: url(bb_PA-2133-small.png);*/
+border-radius: 25px;
+ }
+
+/* PrestonAttebery */
+.userName{ 
+position: absolute;
+width: 112px;
+height: 16px;
+left: 151px;
+top: 69px;
+
+font-family: Greycliff CF;
+line-height: 15px;
+font-size: 14px;
+text-align: center;
+letter-spacing: 0.05em;
+
+color: #3258A8;
+border-radius: 5px;
+}

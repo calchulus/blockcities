@@ -1,0 +1,68 @@
+
+.attr-location {
+/* Group 27 */
+
+position: absolute;
+width: 54px;
+height: 50px;
+left: 22px;
+top: 785px;
+}
+
+
+.attr-name {  
+/* Built */
+
+position: absolute;
+width: 38px;
+height: 15px;
+left: 22px;
+top: 785px;
+
+font-family: Greycliff CF;
+line-height: normal;
+font-size: 12px;
+letter-spacing: 0.05em;
+
+color: #828282;
+border-radius: 5px;
+ }
+
+.attr-value {
+
+/* 1968 */
+
+position: absolute;
+width: 54px;
+height: 35px;
+left: 22px;
+top: 800px;
+
+font-family: Greycliff CF;
+line-height: normal;
+font-size: 22px;
+letter-spacing: 0.05em;
+
+color: #000000;
+border-radius: 5px;
+ }
+
+.building-desc {
+
+/* One World Trade Center (also known as 1 World Trade Center, 1 WTC or Freedom Tower[15]) is the main building of the rebuilt World Trade Center complex in Lower Manhattan, New York City. It is the tallest building in the Western Hemisphere, and the sixth-tallest in the world. The supertall structure has the same name as the North Tower of the original World Trade Center, which was destroyed in the terrorist attacks of September 11, 2001. T */
+
+position: absolute;
+width: 368px;
+height: 172px;
+left: 22px;
+top: 935px;
+
+font-family: Greycliff CF;
+line-height: 25px;
+font-size: 14px;
+letter-spacing: 0.05em;
+
+color: #828282;
+border-radius: 5px;
+
+  }

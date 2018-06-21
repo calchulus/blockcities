@@ -1,0 +1,33 @@
+/* Rectangle */
+
+.set-button { 
+position: absolute;
+width: 284px;
+height: 51px;
+left: 62px;
+top: 601px;
+
+background: rgba(0, 0, 0, 0.1);
+border-radius: 25.5px;
+ }
+
+
+ .button-text {
+/* Set Starting Price */
+
+/*position: absolute;
+width: 154px;
+height: 22px;
+left: 130px;
+top: 616px;*/
+
+font-family: Greycliff CF;
+line-height: normal;
+font-size: 16px;
+text-align: center;
+letter-spacing: 0.05em;
+
+color: #FFFFFF;
+border-radius: 5px;
+
+ }

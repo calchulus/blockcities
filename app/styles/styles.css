@@ -1,0 +1,299 @@
+Styles
+
+
+/* IG 3.1 */
+
+
+.searchData{
+/* Group 19 */
+
+position: absolute;
+width: 55px;
+height: 17px;
+left: 318px;
+top: 88px;
+}
+
+
+
+
+
+/* Filter */
+
+position: absolute;
+width: 41px;
+height: 17px;
+left: 332px;
+top: 88px;
+
+font-family: Lato;
+font-style: normal;
+font-weight: 600;
+line-height: 0px;
+font-size: 14px;
+letter-spacing: 0.04em;
+
+color: #828282;
+
+
+/* Group 18 */
+
+position: absolute;
+width: 8.4px;
+height: 7px;
+left: 318px;
+top: 94px;
+
+
+
+/* Line */
+
+position: absolute;
+width: 8.4px;
+height: 0px;
+left: 318px;
+top: 94px;
+
+border: 1px solid #828282;
+
+
+/* Line */
+
+position: absolute;
+width: 5.6px;
+height: 0px;
+left: 319.4px;
+top: 97.5px;
+
+border: 1px solid #828282;
+
+
+/* Line */
+
+position: absolute;
+width: 4.2px;
+height: 0px;
+left: 320.1px;
+top: 101px;
+
+border: 1px solid #828282;
+
+
+
+}
+
+
+
+
+.buildingImg{
+position: absolute;
+width: 176px;
+height: 220px;
+left: 23px;
+top: 177px;
+
+background: url(IG 3.png);
+border-radius: 7px;
+}
+
+
+.buildingName{ 
+
+	/* Ex:; 1 World Trade Center */
+
+position: absolute;
+width: 142px;
+height: 17px;
+left: 28px;
+top: 404px;
+
+font-family: Greycliff CF;
+line-height: normal;
+font-size: 14px;
+letter-spacing: 0.05em;
+
+color: #000000;
+border-radius: 5px;
+}
+
+
+.buildingAttr{
+/*Ex: ; Era 0 - New York City - Slow Build */
+
+position: absolute;
+width: 165px;
+height: 12px;
+left: 28px;
+top: 424px;
+
+font-family: Greycliff CF;
+line-height: normal;
+font-size: 10px;
+letter-spacing: 0.05em;
+
+color: #7294E8;
+border-radius: 5px;
+}
+
+
+.pricing{
+/*Ex: ; 💸 Buy 0.056 */
+
+position: absolute;
+width: 63px;
+height: 11px;
+left: 28px;
+top: 440px;
+
+font-family: Greycliff CF;
+line-height: 18px;
+font-size: 10px;
+letter-spacing: 0.05em;
+
+color: #828282;
+border-radius: 5px;
+
+}
+
+
+
+
+
+.bottomNav{  
+/* Rectangle */
+
+position: absolute;
+width: 426px;
+height: 50px;
+left: -5px;
+top: 693px;
+
+background: #FFFFFF;
+border: 1px solid #F2F2F2;
+box-sizing: border-box;
+}
+
+.sectionHead{    
+/* Hall of Fame🏅 */
+
+position: absolute;
+width: 157px;
+height: 30px;
+left: 23px;
+top: 140px;
+
+font-family: Greycliff CF;
+line-height: 23px;
+font-size: 22px;
+letter-spacing: 0.05em;
+
+color: #000000;
+border-radius: 5px;
+}
+
+.subhead { 
+/* Top sellers of all time */
+
+position: absolute;
+width: 120px;
+height: 15px;
+left: 185px;
+top: 147px;
+
+font-family: Greycliff CF;
+line-height: normal;
+font-size: 12px;
+letter-spacing: 0.05em;
+
+color: #828282;
+border-radius: 5px;
+ }
+
+
+
+/* PrestonAttebery */
+.username{   
+position: absolute;
+width: 112px;
+height: 16px;
+left: 151px;
+top: 69px;
+
+font-family: Greycliff CF;
+line-height: 15px;
+font-size: 14px;
+text-align: center;
+letter-spacing: 0.05em;
+
+color: #3258A8;
+border-radius: 5px;
+}
+
+
+/* Rectangle */
+/* buildings tab */
+.button1{
+position: absolute;
+width: 180px;
+height: 35px;
+left: 22px;
+top: 111px;
+
+background: #4D92FF;
+border-radius: 22.5px;
+}
+
+
+
+.cityPreview{ 
+/* Artboard 3@3x  Preview of the city*/
+
+position: absolute;
+width: 368px;
+height: 518px;
+left: 23px;
+top: 165px;
+
+background: url(Artboard 3@3x.png);
+border-radius: 7px;
+}
+
+
+/* Your City */
+.cityName{ 
+position: absolute;
+width: 144px;
+height: 39px;
+left: 135px;
+top: 194px;
+
+font-family: Greycliff CF;
+line-height: normal;
+font-size: 32px;
+text-align: center;
+letter-spacing: 0.05em;
+
+color: #000000;
+border-radius: 5px;
+ }
+
+
+ .cityDate{
+/* COMING SOON */
+
+position: absolute;
+width: 114px;
+height: 26px;
+left: 150px;
+top: 240px;
+
+font-family: Greycliff CF;
+line-height: 25px;
+font-size: 14px;
+text-align: center;
+letter-spacing: 0.1em;
+
+color: #4D92FF;
+border-radius: 5px;
+
+ }

@@ -1,0 +1,129 @@
+/* Set Starting Price */
+.start-price { 
+position: absolute;
+width: 138px;
+height: 18px;
+left: 138px;
+top: 24px;
+
+font-family: Greycliff CF;
+line-height: 17px;
+font-size: 16px;
+text-align: center;
+letter-spacing: 0.05em;
+
+color: #FFFFFF;
+border-radius: 5px;
+ }
+
+
+eth SYMBOL!!
+<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0H15.8375V2.5H0V0Z" fill="white"/>
+<path d="M0 0H15.8375V2.5H0V0Z" transform="translate(0 17.5)" fill="white"/>
+<path d="M0 0H10.9644V2.5H0V0Z" transform="translate(2.43652 8.75003)" fill="white"/>
+</svg>
+
+
+/* noun_1195773 */
+
+position: absolute;
+width: 9.63px;
+height: 10px;
+left: 202px;
+top: 48px;
+
+
+
+/* Vector */
+
+position: absolute;
+width: 9.63px;
+height: 10px;
+left: 202px;
+top: 48px;
+
+background: rgba(255, 255, 255, 0.6);
+
+
+/* Group 23 */
+
+position: absolute;
+width: 322px;
+height: 67px;
+left: 46px;
+top: 65px;
+
+
+
+/* $0.10 */
+Price in USD:
+
+.usd-price { 
+position: absolute;
+width: 77px;
+height: 33px;
+left: 291px;
+top: 82px;
+
+font-family: Greycliff CF;
+line-height: normal;
+font-size: 25px;
+text-align: center;
+letter-spacing: 0.02em;
+
+color: rgba(255, 255, 255, 0.6);
+border-radius: 5px;
+ }
+
+/* 0.00012 */
+Price in eth
+.eth-price { 
+position: absolute;
+width: 306px;
+height: 67px;
+left: 46px;
+top: 65px;
+
+font-family: Greycliff CF;
+line-height: normal;
+font-size: 50px;
+text-align: center;
+
+color: #FFFFFF;
+border-radius: 5px;
+ }
+
+/* Group 20 */
+
+position: absolute;
+width: 15.84px;
+height: 20px;
+left: 82px;
+top: 88px;
+
+
+
+/* Group */
+
+position: absolute;
+width: 15.84px;
+height: 20px;
+left: 82px;
+top: 88px;
+
+
+
+/* Vector */
+
+position: absolute;
+width: 9.63px;
+height: 10px;
+left: 202px;
+top: 48px;
+
+background: rgba(255, 255, 255, 0.6);
+<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.81482 0C2.15988 0 0 2.24295 0 5C0 7.75705 2.15988 10 4.81482 10C7.46975 10 9.62963 7.75705 9.62963 5C9.62963 2.24295 7.46975 0 4.81482 0ZM5.30998 7.7929H4.23725V6.75322H5.30998V7.7929ZM6.00678 4.97311C5.69022 5.21781 5.35186 5.41661 5.28567 5.86721V6.15792H4.29229V5.8141C4.33628 5.14896 4.63801 4.85115 4.93237 4.61421C5.21936 4.37749 5.46952 4.20186 5.46952 3.78896C5.46952 3.32273 5.2342 3.1012 4.84428 3.1012C4.3146 3.1012 4.0938 3.55202 4.08623 4.09464H3.00455C3.02676 3.00197 3.71841 2.20721 4.79261 2.20721C6.18338 2.20721 6.62508 3.09366 6.62508 3.68175C6.62508 4.42317 6.32335 4.7212 6.00678 4.97311Z" fill="white" fill-opacity="0.6"/>
+</svg>
+
