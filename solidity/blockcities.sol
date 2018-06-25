@@ -663,22 +663,22 @@ contract BuildingOwnership is BuildingBase, ERC721 {
     }
 }
 
-/// @title A facet of KittyCore that manages Building siring, gestation, and birth.
+/// @title A facet of BuildingCore that manages Building siring, gestation, and birth.
 /// @author Axiom Zen (https://www.axiomzen.co)
 /// @dev See the KittyCore contract documentation to understand how the various contract facets are arranged.
-contract KittyBreeding is KittyOwnership {
+contract BuildingBlueprinting is BuildingOwnership {
 
-    /// @dev The Pregnant event is fired when two buildings successfully breed and the pregnancy
+    /// @dev The Constructing event is fired when two buildings successfully breed and the pregnancy
     ///  timer begins for the matron.
-    event Pregnant(address owner, uint256 matronId, uint256 sireId, uint256 cooldownEndBlock);
+    event Constructing(address owner, uint256 blueprint1Id, uint256 blueprint2Id, uint256 cooldownEndBlock);
 
     /// @notice The minimum payment required to use breedWithAuto(). This fee goes towards
     ///  the gas cost paid by whatever calls giveBirth(), and can be dynamically updated by
     ///  the COO role as the gas price changes.
     uint256 public autoBirthFee = 2 finney;
 
-    // Keeps track of number of pregnant kitties.
-    uint256 public pregnantKitties;
+    // Keeps track of number of Constructing kitties.
+    uint256 public ConstructingBuildings;
 
     /// @dev The address of the sibling contract that is used to implement the sooper-sekret
     ///  genetic combination algorithm.
@@ -706,8 +706,8 @@ contract KittyBreeding is KittyOwnership {
         return (_kit.siringWithId == 0) && (_kit.cooldownEndBlock <= uint64(block.number));
     }
 
-    /// @dev Check if a sire has authorized breeding with this matron. True if both sire
-    ///  and matron have the same owner, or if the sire has given siring permission to
+    /// @dev Check if a building1has authorized breeding with this matron. True if both sire
+    ///  and building1 have the same owner, or if the building1has given siring permission to
     ///  the matron's owner (via approveSiring()).
     function _isSiringPermitted(uint256 _sireId, uint256 _matronId) internal view returns (bool) {
         address matronOwner = buildingIndexToOwner[_matronId];
@@ -721,22 +721,22 @@ contract KittyBreeding is KittyOwnership {
     /// @dev Set the cooldownEndTime for the given Kitty, based on its current cooldownIndex.
     ///  Also increments the cooldownIndex (unless it has hit the cap).
     /// @param _Building A reference to the Building in storage which needs its timer started.
-    function _triggerCooldown(Building storage _kitten) internal {
+    function _triggerCooldown(Building storage _building) internal {
         // Compute an estimation of the cooldown time in blocks (based on current cooldownIndex).
-        _kitten.cooldownEndBlock = uint64((cooldowns[_kitten.cooldownIndex]/secondsPerBlock) + block.number);
+        _building.cooldownEndBlock = uint64((cooldowns[_building.cooldownIndex]/secondsPerBlock) + block.number);
 
         // Increment the breeding count, clamping it at 13, which is the length of the
         // cooldowns array. We could check the array size dynamically, but hard-coding
         // this as a constant saves gas. Yay, Solidity!
-        if (_kitten.cooldownIndex < 13) {
-            _kitten.cooldownIndex += 1;
+        if (_building.cooldownIndex < 13) {
+            _building.cooldownIndex += 1;
         }
     }
 
-    /// @notice Grants approval to another user to sire with one of your Kitties.
-    /// @param _addr The address that will be able to sire with your Building. Set to
+    /// @notice Grants approval to another user to building1with one of your Kitties.
+    /// @param _addr The address that will be able to building1with your Building. Set to
     ///  address(0) to clear all siring approvals for this Building.
-    /// @param _sireId A Building that you own that _addr will now be able to sire with.
+    /// @param _sireId A Building that you own that _addr will now be able to building1with.
     function approveSiring(address _addr, uint256 _sireId)
         external
         whenNotPaused
@@ -746,19 +746,18 @@ contract KittyBreeding is KittyOwnership {
     }
 
     /// @dev Updates the minimum payment required for calling giveBirthAuto(). Can only
-    ///  be called by the COO address. (This fee is used to offset the gas cost incurred
-    ///  by the autobirth daemon).
+    ///  be called by the COO address. (This fee is used to offset the gas cost incurred by the autobirth daemon).
     function setAutoBirthFee(uint256 val) external onlyCOO {
         autoBirthFee = val;
     }
 
-    /// @dev Checks to see if a given Building is pregnant and (if so) if the gestation
+    /// @dev Checks to see if a given Building is Constructing and (if so) if the gestation
     ///  period has passed.
     function _isReadyToGiveBirth(Building _matron) private view returns (bool) {
         return (_matron.siringWithId != 0) && (_matron.cooldownEndBlock <= uint64(block.number));
     }
 
-    /// @notice Checks that a given Building is able to breed (i.e. it is not pregnant or
+    /// @notice Checks that a given Building is able to breed (i.e. it is not Constructing or
     ///  in the middle of a siring cooldown).
     /// @param _kittyId reference the id of the kitten, any user can inquire about it
     function isReadyToBreed(uint256 _buildingId)
@@ -766,33 +765,33 @@ contract KittyBreeding is KittyOwnership {
         view
         returns (bool)
     {
-        require(_kittyId > 0);
+        require(_buildingId > 0);
         Building storage kit = buildings[_buildingId];
         return _isReadyToBreed(kit);
     }
 
-    /// @dev Checks whether a Building is currently pregnant.
-    /// @param _kittyId reference the id of the kitten, any user can inquire about it
-    function isPregnant(uint256 _kittyId)
+    /// @dev Checks whether a Building is currently Constructing.
+    /// @param _buildingId reference the id of the kitten (public)
+    function isConstructing(uint256 _buildingId)
         public
         view
         returns (bool)
     {
-        require(_kittyId > 0);
-        // A Building is pregnant if and only if this field is set
-        return kitties[_kittyId].siringWithId != 0;
+        require(_buildingId > 0);
+        // A Building is Constructing if and only if this field is set
+        return buildings[_kittyId].siringWithId != 0;
     }
 
-    /// @dev Internal check to see if a given sire and matron are a valid mating pair. DOES NOT
+    /// @dev Internal check to see if a given building1and building1 are a valid mating pair. DOES NOT
     ///  check ownership permissions (that is up to the caller).
     /// @param _matron A reference to the Building struct of the potential matron.
     /// @param _matronId The matron's ID.
-    /// @param _sire A reference to the Building struct of the potential sire.
+    /// @param _building A reference to the Building struct of the potential sire.
     /// @param _sireId The sire's ID
     function _isValidMatingPair(
-        Building storage _matron,
+        Building storage _blueprint1,
         uint256 _matronId,
-        Building storage _sire,
+        Building storage _blueprint2,
         uint256 _sireId
     )
         private
@@ -813,7 +812,7 @@ contract KittyBreeding is KittyOwnership {
         }
 
         // We can short circuit the sibling check (below) if either building is
-        // gen zero (has a matron ID of zero).
+        // gen zero (has a building1 ID of zero).
         if (_sire.matronId == 0 || _matron.matronId == 0) {
             return true;
         }
@@ -830,22 +829,22 @@ contract KittyBreeding is KittyOwnership {
         return true;
     }
 
-    /// @dev Internal check to see if a given sire and matron are a valid mating pair for
+    /// @dev Internal check to see if a given building1and building1 are a valid mating pair for
     ///  breeding via auction (i.e. skips ownership and siring approval checks).
     function _canBreedWithViaAuction(uint256 _matronId, uint256 _sireId)
         internal
         view
         returns (bool)
     {
-        Building storage matron = kitties[_matronId];
-        Building storage sire = kitties[_sireId];
+        Building storage building1 = buildings[_matronId];
+        Building storage building1= buildings[_sireId];
         return _isValidMatingPair(matron, _matronId, sire, _sireId);
     }
 
     /// @notice Checks to see if two buildings can breed together, including checks for
     ///  ownership and siring approvals. Does NOT check that both buildings are ready for
     ///  breeding (i.e. breedWith could still fail until the cooldowns are finished).
-    ///  TODO: Shouldn't this check pregnancy and cooldowns?!?
+    ///  TODO: Shouldn't this check pregnancy and cooldowns?!? ***
     /// @param _matronId The ID of the proposed matron.
     /// @param _sireId The ID of the proposed sire.
     function canBreedWith(uint256 _matronId, uint256 _sireId)
@@ -855,8 +854,8 @@ contract KittyBreeding is KittyOwnership {
     {
         require(_matronId > 0);
         require(_sireId > 0);
-        Building storage matron = kitties[_matronId];
-        Building storage sire = kitties[_sireId];
+        Building storage building1 = buildings[_matronId];
+        Building storage building1= buildings[_sireId];
         return _isValidMatingPair(matron, _matronId, sire, _sireId) &&
             _isSiringPermitted(_sireId, _matronId);
     }
@@ -865,10 +864,10 @@ contract KittyBreeding is KittyOwnership {
     ///  requirements have been checked.
     function _breedWith(uint256 _matronId, uint256 _sireId) internal {
         // Grab a reference to the Buildings from storage.
-        Building storage sire = kitties[_sireId];
-        Building storage matron = kitties[_matronId];
+        Building storage building1= buildings[_sireId];
+        Building storage building1 = buildings[_matronId];
 
-        // Mark the matron as pregnant, keeping track of who the sire is.
+        // Mark the building1 as Constructing, keeping track of who the building1is.
         matron.siringWithId = uint32(_sireId);
 
         // Trigger the cooldown for both parents.
@@ -880,18 +879,18 @@ contract KittyBreeding is KittyOwnership {
         delete sireAllowedToAddress[_matronId];
         delete sireAllowedToAddress[_sireId];
 
-        // Every time a Building gets pregnant, counter is incremented.
-        pregnantKitties++;
+        // Every time a Building gets Constructing, counter is incremented.
+        ConstructingBuildings++;
 
         // Emit the pregnancy event.
-        Pregnant(buildingIndexToOwner[_matronId], _matronId, _sireId, matron.cooldownEndBlock);
+        Constructing(buildingIndexToOwner[_matronId], _matronId, _sireId, matron.cooldownEndBlock);
     }
 
-    /// @notice Breed a Building you own (as matron) with a sire that you own, or for which you
-    ///  have previously been given Siring approval. Will either make your building pregnant, or will
+    /// @notice Breed a Building you own (as matron) with a building1that you own, or for which you
+    ///  have previously been given Siring approval. Will either allow your building to begin constructing, or will
     ///  fail entirely. Requires a pre-payment of the fee given out to the first caller of giveBirth()
-    /// @param _matronId The ID of the Building acting as matron (will end up pregnant if successful)
-    /// @param _sireId The ID of the Building acting as sire (will begin its siring cooldown if successful)
+    /// @param _matronId The ID of the Building acting as building1 (will end up Constructing if successful)
+    /// @param _sireId The ID of the Building acting as building1(will begin its siring cooldown if successful)
     function breedWithAuto(uint256 _matronId, uint256 _sireId)
         external
         payable
@@ -903,32 +902,32 @@ contract KittyBreeding is KittyOwnership {
         // Caller must own the matron.
         require(_owns(msg.sender, _matronId));
 
-        // Neither sire nor matron are allowed to be on auction during a normal
+        // Neither building1 nor building2 are allowed to be on auction during a normal
         // breeding operation, but we don't need to check that explicitly.
         // For matron: The caller of this function can't be the owner of the matron
         //   because the owner of a Building on auction is the auction house, and the
         //   auction house will never call breedWith().
-        // For sire: Similarly, a sire on auction will be owned by the auction house
+        // For sire: Similarly, a building2 on auction will be owned by the auction house
         //   and the act of transferring ownership will have cleared any oustanding
         //   siring approval.
         // Thus we don't need to spend gas explicitly checking to see if either cat
         // is on auction.
 
-        // Check that matron and sire are both owned by caller, or that the sire
+        // Check that building1 and building2 are both owned by caller, or that the sire
         // has given siring permission to caller (i.e. matron's owner).
         // Will fail for _sireId = 0
         require(_isSiringPermitted(_sireId, _matronId));
 
         // Grab a reference to the potential matron
-        Building storage matron = kitties[_matronId];
+        Building storage building1 = buildings[_matronId];
 
-        // Make sure matron isn't pregnant, or in the middle of a siring cooldown
+        // Make sure building1 isn't Constructing, or in the middle of a siring cooldown
         require(_isReadyToBreed(matron));
 
         // Grab a reference to the potential sire
-        Building storage sire = kitties[_sireId];
+        Building storage building1= buildings[_sireId];
 
-        // Make sure sire isn't pregnant, or in the middle of a siring cooldown
+        // Make sure building1isn't Constructing, or in the middle of a siring cooldown
         require(_isReadyToBreed(sire));
 
         // Test that these buildings are a valid mating pair.
@@ -939,16 +938,16 @@ contract KittyBreeding is KittyOwnership {
             _sireId
         ));
 
-        // All checks passed, Building gets pregnant!
+        // All checks passed, Building gets Constructing!
         _breedWith(_matronId, _sireId);
     }
 
-    /// @notice Have a pregnant Building give birth!
+    /// @notice Have a Constructing Building give birth!
     /// @param _matronId A Building ready to give birth.
     /// @return The Building ID of the new kitten.
-    /// @dev Looks at a given Building and, if pregnant and if the gestation period has passed,
+    /// @dev Looks at a given Building and, if Constructing and if the gestation period has passed,
     ///  combines the genes of the two parents to create a new kitten. The new Building is assigned
-    ///  to the current owner of the matron. Upon successful completion, both the matron and the
+    ///  to the current owner of the matron. Upon successful completion, both the building1 and the
     ///  new Building will be ready to breed again. Note that anyone can call this function (if they
     ///  are willing to pay the gas!), but the new Building always goes to the mother's owner.
     function giveBirth(uint256 _matronId)
@@ -956,18 +955,18 @@ contract KittyBreeding is KittyOwnership {
         whenNotPaused
         returns(uint256)
     {
-        // Grab a reference to the matron in storage.
-        Building storage matron = kitties[_matronId];
+        // Grab a reference to the building1 in storage.
+        Building storage building1 = buildings[_matronId];
 
-        // Check that the matron is a valid cat.
+        // Check that the building1 is a valid cat.
         require(matron.constructTime != 0);
 
-        // Check that the matron is pregnant, and that its time has come!
+        // Check that the building1 is Constructing, and that its time has come!
         require(_isReadyToGiveBirth(matron));
 
-        // Grab a reference to the sire in storage.
+        // Grab a reference to the building1in storage.
         uint256 sireId = matron.siringWithId;
-        Building storage sire = kitties[sireId];
+        Building storage building1= buildings[sireId];
 
         // Determine the higher generation number of the two parents
         uint16 parentGen = matron.generation;
@@ -982,12 +981,12 @@ contract KittyBreeding is KittyOwnership {
         address owner = buildingIndexToOwner[_matronId];
         uint256 kittenId = _createKitty(_matronId, matron.siringWithId, parentGen + 1, childGenes, owner);
 
-        // Clear the reference to sire from the matron (REQUIRED! Having siringWithId
-        // set is what marks a matron as being pregnant.)
+        // Clear the reference to building1from the building1 (REQUIRED! Having siringWithId
+        // set is what marks a building1 as being Constructing.)
         delete matron.siringWithId;
 
         // Every time a Building gives birth counter is decremented.
-        pregnantKitties--;
+        ConstructingBuildings--;
 
         // Send the balance fee to the person who made birth happen.
         msg.sender.send(autoBirthFee);
@@ -998,19 +997,10 @@ contract KittyBreeding is KittyOwnership {
 }
 
 
-
-
-
-
-
-
-
-
 /// @title Auction Core
 /// @dev Contains models, variables, and internal methods for the auction.
 /// @notice We omit a fallback function to prevent accidental sends to this contract.
 contract ClockAuctionBase {
-
     // Represents an auction on an NFT
     struct Auction {
         // Current owner of NFT
@@ -1028,7 +1018,6 @@ contract ClockAuctionBase {
 
     // Reference to contract tracking NFT ownership
     ERC721 public nonFungibleContract;
-
     // Cut owner takes on each auction, measured in basis points (1/100 of a percent).
     // Values 0-10,000 map to 0%-100%
     uint256 public ownerCut;
@@ -1104,6 +1093,7 @@ contract ClockAuctionBase {
         // (Because of how Ethereum mappings work, we can't just count
         // on the lookup above failing. An invalid _tokenId will just
         // return an auction object that is all zeros.)
+        // ** seems like something we can improve on
         require(_isOnAuction(auction));
 
         // Check that the bid is greater than or equal to the current price
@@ -1143,9 +1133,8 @@ contract ClockAuctionBase {
         // equal to the price so this cannot underflow.
         uint256 bidExcess = _bidAmount - price;
 
-        // Return the funds. Similar to the previous transfer, this is
-        // not susceptible to a re-entry attack because the auction is
-        // removed before any transfers occur.
+        // Return the funds. Similar to the previous transfer, this is not susceptible 
+        // to a re-entry attack because the auction is removed before any transfers occur.
         msg.sender.transfer(bidExcess);
 
         // Tell the world!
@@ -1154,7 +1143,7 @@ contract ClockAuctionBase {
         return price;
     }
 
-    /// @dev Removes an auction from the list of open auctions.
+    /// @dev Removes an auction from the list of open auctions. 
     /// @param _tokenId - ID of NFT on auction.
     function _removeAuction(uint256 _tokenId) internal {
         delete tokenIdToAuction[_tokenId];
@@ -1209,11 +1198,11 @@ contract ClockAuctionBase {
         // NOTE: We don't use SafeMath (or similar) in this function because
         //  all of our public functions carefully cap the maximum values for
         //  time (at 64-bits) and currency (at 128-bits). _duration is
-        //  also known to be non-zero (see the require() statement in
-        //  _addAuction())
+        //  also known to be non-zero (see the require() statement in _addAuction())
+        //  ** Maybe something to take a look at in the future 
         if (_secondsPassed >= _duration) {
             // We've reached the end of the dynamic pricing portion
-            // of the auction, just return the end price.
+            // of the auction, just return the end price that is fixed as a floor.
             return _endingPrice;
         } else {
             // Starting price can be higher than ending price (and often is!), so
@@ -1247,11 +1236,6 @@ contract ClockAuctionBase {
 }
 
 
-
-
-
-
-
 /**
  * @title Pausable
  * @dev Base contract which allows children to implement an emergency stop mechanism.
@@ -1261,7 +1245,6 @@ contract Pausable is Ownable {
   event Unpause();
 
   bool public paused = false;
-
 
   /**
    * @dev modifier to allow actions only when the contract IS paused
@@ -1298,7 +1281,6 @@ contract Pausable is Ownable {
   }
 }
 
-
 /// @title Clock auction for non-fungible tokens.
 /// @notice We omit a fallback function to prevent accidental sends to this contract.
 contract ClockAuction is Pausable, ClockAuctionBase {
@@ -1317,13 +1299,12 @@ contract ClockAuction is Pausable, ClockAuctionBase {
     function ClockAuction(address _nftAddress, uint256 _cut) public {
         require(_cut <= 10000);
         ownerCut = _cut;
-
         ERC721 candidateContract = ERC721(_nftAddress);
         require(candidateContract.supportsInterface(InterfaceSignature_ERC721));
         nonFungibleContract = candidateContract;
     }
 
-    /// @dev Remove all Ether from the contract, which is the owner's cuts
+    /// @dev Remove all Ether from the contract, which is the owner's cut
     ///  as well as any Ether sent directly to the contract address.
     ///  Always transfers to the NFT contract, but can be called either by
     ///  the owner or the NFT contract.
@@ -1450,9 +1431,7 @@ contract ClockAuction is Pausable, ClockAuctionBase {
         require(_isOnAuction(auction));
         return _currentPrice(auction);
     }
-
 }
-
 
 /// @title Reverse auction modified for siring
 /// @notice We omit a fallback function to prevent accidental sends to this contract.
@@ -1500,10 +1479,9 @@ contract SiringClockAuction is ClockAuction {
         _addAuction(_tokenId, auction);
     }
 
-    /// @dev Places a bid for siring. Requires the sender
-    /// is the KittyCore contract because all bid methods
-    /// should be wrapped. Also returns the Building to the
-    /// seller rather than the winner.
+    /// @dev Places a bid for blueprinting. Requires the sender
+    /// use the BuildingCore contract because all bid methods
+    /// should be wrapped. Also returns the Building to the seller rather than the winner.
     function bid(uint256 _tokenId)
         external
         payable
@@ -1651,13 +1629,13 @@ contract KittyAuction is KittyBreeding {
         // If Building is already on any auction, this will throw
         // because it will be owned by the auction contract.
         require(_owns(msg.sender, _kittyId));
-        // Ensure the Building is not pregnant to prevent the auction
+        // Ensure the Building is not Constructing to prevent the auction
         // contract accidentally receiving ownership of the child.
         // NOTE: the Building IS allowed to be in a cooldown.
-        require(!isPregnant(_kittyId));
+        require(!isConstructing(_kittyId));
         _approve(_kittyId, saleAuction);
         // Sale auction throws if inputs are invalid and clears
-        // transfer and sire approval after escrowing the Building.
+        // transfer and building1approval after escrowing the Building.
         saleAuction.createAuction(
             _kittyId,
             _startingPrice,
@@ -1686,7 +1664,7 @@ contract KittyAuction is KittyBreeding {
         require(isReadyToBreed(_kittyId));
         _approve(_kittyId, siringAuction);
         // Siring auction throws if inputs are invalid and clears
-        // transfer and sire approval after escrowing the Building.
+        // transfer and building1approval after escrowing the Building.
         siringAuction.createAuction(
             _kittyId,
             _startingPrice,
@@ -1697,9 +1675,9 @@ contract KittyAuction is KittyBreeding {
     }
 
     /// @dev Completes a siring auction by bidding.
-    ///  Immediately breeds the winning matron with the sire on auction.
-    /// @param _sireId - ID of the sire on auction.
-    /// @param _matronId - ID of the matron owned by the bidder.
+    ///  Immediately breeds the winning building1 with the building1on auction.
+    /// @param _sireId - ID of the building1on auction.
+    /// @param _matronId - ID of the building1 owned by the bidder.
     function bidOnSiringAuction(
         uint256 _sireId,
         uint256 _matronId
@@ -1928,8 +1906,8 @@ contract KittyCore is KittyMinting {
     // @dev Allows the CFO to capture the balance available to the contract.
     function withdrawBalance() external onlyCFO {
         uint256 balance = this.balance;
-        // Subtract all the currently pregnant kittens we have, plus 1 of margin.
-        uint256 subtractFees = (pregnantKitties + 1) * autoBirthFee;
+        // Subtract all the currently Constructing kittens we have, plus 1 of margin.
+        uint256 subtractFees = (ConstructingBuildings + 1) * autoBirthFee;
 
         if (balance > subtractFees) {
             cfoAddress.send(balance - subtractFees);
