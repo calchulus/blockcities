@@ -15,7 +15,7 @@ contract Ownable {
    * @dev The Ownable constructor sets the original `owner` of the contract to the sender
    * account.
    */
-  function Ownable() {
+  function Ownable() public {
     owner = msg.sender;
   }
 
@@ -31,7 +31,7 @@ contract Ownable {
    * @dev Allows the current building owner to transfer control of the contract to a newOwner.
    * @param newOwner The address to transfer ownership to.
    */
-  function transferOwnership(address newOwner) onlyOwner {
+  function transferOwnership(address newOwner) public onlyOwner {
     if (newOwner != address(0)) {
       owner = newOwner;
     }
@@ -67,11 +67,11 @@ contract ERC721 {
 contract BlueprintFormula {
     function isBlueprintScience() public pure returns (bool);
     /// @dev given blueprints of buildings 1 & 2, return a genetic building combination w/ some randomness
-    /// @param blueprint1 DNA of constructing
-    /// @param blueprint2 DNA of building2
+    /// @param constructingId DNA of constructing
+    /// @param blueprintId DNA of building2
     /// currently housed in some Python code.
     /// @return the DNA that is supposed to be passed down the child
-    function mixBlueprints(uint256 blueprint1, uint256 blueprint2, uint256 targetBlock) public returns (uint256);
+    function mixBlueprints(uint256 constructingId, uint256 blueprintId, uint256 targetBlock) public returns (uint256);
 }
 
 /// @title A facet of BuildingCore that manages special access privileges.
@@ -193,7 +193,7 @@ contract BuildingAccessControl {
 contract BuildingBase is BuildingAccessControl {
     /*** EVENTS ***/
 
-    /// @dev The Build event occurs either by "construction" by 2 mating buildings, or when era0 buildings are minted.
+    /// @dev The Build event occurs either by "construction" by 2 constructing buildings, or when era0 buildings are minted.
     ///  when a new era0 building is created.
     event Build(address owner, uint256 buildingId, uint256 blueprintId, uint256 constructingId, uint256 DNA);
 
@@ -220,7 +220,7 @@ contract BuildingBase is BuildingAccessControl {
         // transactions per year! We can revisit this when we have enough buildings to worry about this.
         uint32 blueprintId;
         uint32 constructingId;
-        // Set to the ID of blueprint2ID when blueprint1ID is building the building. Used to gather traits from both "parents"
+        // Set to the ID of blueprintId when constructingId is building the building. Used to gather traits from both "parents"
         uint32 blueprintingWithId;
 
         // Set to the index in the cooldown array (see below) that represents
@@ -232,7 +232,7 @@ contract BuildingBase is BuildingAccessControl {
         // The "era number" of this building. Unique, real-world buildings start out as minted
         // by the BlockCities team, and have an era number of 0. The
         // era number of all other building is the larger of the two era 'numbers of their parents, plus one.
-        // (i.e. max(blueprint1.era, blueprint2.era) + 1)
+        // (i.e. max(constructingId.era, blueprintId.era) + 1)
         uint16 era;
     }
 
@@ -309,8 +309,8 @@ contract BuildingBase is BuildingAccessControl {
 
     /// @dev An internal method that creates a new Building and stores it. Will generate both a Build event
     ///  and a Transfer event.
-    /// @param _blueprint1Id The Building ID of the blueprint1 of this building (zero for era0)
-    /// @param _blueprint2Id The Building ID of the blueprint2 of this building (zero for era0)
+    /// @param _constructingId The Building ID of the constructingId of this building (zero for era0)
+    /// @param _blueprintId The Building ID of the blueprintId of this building (zero for era0)
     /// @param _era The era number of this building, must be computed by caller.
     /// @param _DNA The building's genetic code.
     /// @param _owner The inital owner of this building, must be non-zero, save for the very first building
@@ -666,9 +666,9 @@ contract BuildingBlueprinting is BuildingOwnership {
 
     /// @dev The Constructing event is fired when two buildings successfully breed and the pregnancy
     ///  timer begins for the constructing.
-    event Constructing(address owner, uint256 blueprint1Id, uint256 blueprint2Id, uint256 cooldownEndBlock);
+    event Constructing(address owner, uint256 constructingId, uint256 blueprintId, uint256 cooldownEndBlock);
 
-    /// @notice The minimum payment required to use breedWithAuto(). This fee goes towards
+    /// @notice The minimum payment required to use constructWithAuto(). This fee goes towards
     ///  the gas cost paid by whatever calls giveBirth(), and can be dynamically updated by
     ///  the COO role as the gas price changes.
     uint256 public autoBirthFee = 2 finney;
@@ -692,14 +692,14 @@ contract BuildingBlueprinting is BuildingOwnership {
     /// @dev Checks that a given Building is able to breed. Requires that the
     ///  current cooldown is finished (for blueprints) and also checks that there is
     ///  no pending pregnancy.
-    function _isReadyToBreed(Building _built) internal view returns (bool) {
+    function _isReadyToConstruct(Building _built) internal view returns (bool) {
         // In addition to checking the cooldownEndBlock, we also need to check to see if
         // the building has a pending birth; there can be some period of time between the end
         // of the pregnacy timer and the birth event.
         return (_built.blueprintingWithId == 0) && (_built.cooldownEndBlock <= uint64(block.number));
     }
 
-    /// @dev Check if a constructinghas authorized breeding with this constructing. True if both blueprint
+    /// @dev Check if a constructinghas authorized blueprinting with this constructing. True if both blueprint
     ///  and constructing have the same owner, or if the constructinghas given blueprinting permission to
     ///  the constructing's owner (via approveblueprinting()).
     function _isblueprintingPermitted(uint256 _blueprintId, uint256 _constructingId) internal view returns (bool) {
@@ -718,7 +718,7 @@ contract BuildingBlueprinting is BuildingOwnership {
         // Compute an estimation of the cooldown time in blocks (based on current cooldownIndex).
         _building.cooldownEndBlock = uint64((cooldowns[_building.cooldownIndex]/secondsPerBlock) + block.number);
 
-        // Increment the breeding count, clamping it at 13, which is the length of the
+        // Increment the blueprinting count, clamping it at 13, which is the length of the
         // cooldowns array. We could check the array size dynamically, but hard-coding
         // this as a constant saves gas. Yay, Solidity!
         if (_building.cooldownIndex < 13) {
@@ -753,14 +753,14 @@ contract BuildingBlueprinting is BuildingOwnership {
     /// @notice Checks that a given Building is able to breed (i.e. it is not Constructing or
     ///  in the middle of a blueprinting cooldown).
     /// @param _buildingId reference the id of the building, any user can inquire about it
-    function isReadyToBreed(uint256 _buildingId)
+    function isReadyToConstruct(uint256 _buildingId)
         public
         view
         returns (bool)
     {
         require(_buildingId > 0);
         Building storage built = buildings[_buildingId];
-        return _isReadyToBreed(built);
+        return _isReadyToConstruct(built);
     }
 
     /// @dev Checks whether a Building is currently Constructing.
@@ -775,16 +775,16 @@ contract BuildingBlueprinting is BuildingOwnership {
         return buildings[_buildingId].blueprintingWithId != 0;
     }
 
-    /// @dev Internal check to see if a given constructingand constructing are a valid mating pair. DOES NOT
+    /// @dev Internal check to see if a given constructingand constructing are a valid constructing pair. DOES NOT
     ///  check ownership permissions (that is up to the caller).
     /// @param _constructing A reference to the Building struct of the potential constructing.
     /// @param _constructingId The constructing's ID.
     /// @param _building A reference to the Building struct of the potential blueprint.
     /// @param _blueprintId The blueprint's ID
-    function _isValidMatingPair(
-        Building storage _constructing,
+    function _isValidConstructingPair(
+        Building storage constructing,
         uint256 _constructingId,
-        Building storage _blueprint,
+        Building storage blueprint,
         uint256 _blueprintId
     )
         private
@@ -797,24 +797,24 @@ contract BuildingBlueprinting is BuildingOwnership {
         }
 
         // Buildings can't breed with their parents.
-        if (_constructing.constructingId == _blueprintId || _constructing.blueprintId == _blueprintId) {
+        if (_constructingId.constructingId == _blueprintId || _constructingId.blueprintId == _blueprintId) {
             return false;
         }
-        if (_blueprint.constructingId == _constructingId || _blueprint.blueprintId == _constructingId) {
+        if (_blueprintId.constructingId == _constructingId || _blueprintId.blueprintId == _constructingId) {
             return false;
         }
 
         // We can short circuit the sibling check (below) if either building is
         // gen zero (has a constructing ID of zero).
-        if (_blueprint.constructingId == 0 || _constructing.constructingId == 0) {
+        if (_blueprintId.constructingId == 0 || _constructingId.constructingId == 0) {
             return true;
         }
 
         // Buildings can't breed with full or half siblings.
-        if (_blueprint.constructingId == _constructing.constructingId || _blueprint.constructingId == _constructing.blueprintId) {
+        if (_blueprintId.constructingId == _constructingId.constructingId || _blueprintId.constructingId == _constructing.blueprintId) {
             return false;
         }
-        if (_blueprint.blueprintId == _constructing.constructingId || _blueprint.blueprintId == _constructing.blueprintId) {
+        if (_blueprintId.blueprintId == _constructingId.constructingId || _blueprintId.blueprintId == _constructingId.blueprintId) {
             return false;
         }
 
@@ -822,25 +822,25 @@ contract BuildingBlueprinting is BuildingOwnership {
         return true;
     }
 
-    /// @dev Internal check to see if a given constructingand constructing are a valid mating pair for
-    ///  breeding via auction (i.e. skips ownership and blueprinting approval checks).
-    function _canBreedWithViaAuction(uint256 _constructingId, uint256 _blueprintId)
+    /// @dev Internal check to see if a given constructingand constructing are a valid constructing pair for
+    ///  blueprinting via auction (i.e. skips ownership and blueprinting approval checks).
+    function _canconstructWithViaAuction(uint256 _constructingId, uint256 _blueprintId)
         internal
         view
         returns (bool)
     {
         Building storage constructing = buildings[_constructingId];
-        Building storage constructing= buildings[_blueprintId];
-        return _isValidMatingPair(constructing, _constructingId, blueprint, _blueprintId);
+        Building storage blueprinting = buildings[_blueprintId];
+        return _isValidConstructingPair(constructing, _constructingId, blueprinting, _blueprintId);
     }
 
     /// @notice Checks to see if two buildings can breed together, including checks for
     ///  ownership and blueprinting approvals. Does NOT check that both buildings are ready for
-    ///  breeding (i.e. breedWith could still fail until the cooldowns are finished).
+    ///  blueprinting (i.e. constructWith could still fail until the cooldowns are finished).
     ///  TODO: Shouldn't this check pregnancy and cooldowns?!? ***
     /// @param _constructingId The ID of the proposed constructing.
     /// @param _blueprintId The ID of the proposed blueprint.
-    function canBreedWith(uint256 _constructingId, uint256 _blueprintId)
+    function canconstructWith(uint256 _constructingId, uint256 _blueprintId)
         external
         view
         returns(bool)
@@ -848,23 +848,23 @@ contract BuildingBlueprinting is BuildingOwnership {
         require(_constructingId > 0);
         require(_blueprintId > 0);
         Building storage constructing = buildings[_constructingId];
-        Building storage constructing= buildings[_blueprintId];
-        return _isValidMatingPair(constructing, _constructingId, blueprint, _blueprintId) &&
+        Building storage blueprinting = buildings[_blueprintId];
+        return _isValidConstructingPair(constructing, _constructingId, blueprinting, _blueprintId) &&
             _isblueprintingPermitted(_blueprintId, _constructingId);
     }
 
-    /// @dev Internal utility function to initiate breeding, assumes that all breeding
+    /// @dev Internal utility function to initiate blueprinting, assumes that all blueprinting
     ///  requirements have been checked.
-    function _breedWith(uint256 _constructingId, uint256 _blueprintId) internal {
+    function _constructWith(uint256 _constructingId, uint256 _blueprintId) internal {
         // Grab a reference to the Buildings from storage.
         Building storage constructing= buildings[_blueprintId];
-        Building storage constructing = buildings[_constructingId];
+        Building storage blueprinting = buildings[_constructingId];
 
         // Mark the constructing as Constructing, keeping track of who the constructingis.
         constructing.blueprintingWithId = uint32(_blueprintId);
 
         // Trigger the cooldown for both parents.
-        _triggerCooldown(blueprint);
+        _triggerCooldown(blueprinting);
         _triggerCooldown(constructing);
 
         // Clear blueprinting permission for both parents. This may not be strictly necessary
@@ -884,7 +884,7 @@ contract BuildingBlueprinting is BuildingOwnership {
     ///  fail entirely. Requires a pre-payment of the fee given out to the first caller of giveBirth()
     /// @param _constructingId The ID of the Building acting as constructing (will end up Constructing if successful)
     /// @param _blueprintId The ID of the Building acting as constructing(will begin its blueprinting cooldown if successful)
-    function breedWithAuto(uint256 _constructingId, uint256 _blueprintId)
+    function constructWithAuto(uint256 _constructingId, uint256 _blueprintId)
         external
         payable
         whenNotPaused
@@ -896,10 +896,10 @@ contract BuildingBlueprinting is BuildingOwnership {
         require(_owns(msg.sender, _constructingId));
 
         // Neither constructing nor building2 are allowed to be on auction during a normal
-        // breeding operation, but we don't need to check that explicitly.
+        // blueprinting operation, but we don't need to check that explicitly.
         // For constructing: The caller of this function can't be the owner of the constructing
         //   because the owner of a Building on auction is the auction house, and the
-        //   auction house will never call breedWith().
+        //   auction house will never call constructWith().
         // For blueprint: Similarly, a building2 on auction will be owned by the auction house
         //   and the act of transferring ownership will have cleared any oustanding
         //   blueprinting approval.
@@ -915,24 +915,24 @@ contract BuildingBlueprinting is BuildingOwnership {
         Building storage constructing = buildings[_constructingId];
 
         // Make sure constructing isn't Constructing, or in the middle of a blueprinting cooldown
-        require(_isReadyToBreed(constructing));
+        require(_isReadyToConstruct(constructing));
 
         // Grab a reference to the potential blueprint
-        Building storage constructing= buildings[_blueprintId];
+        Building storage blueprinting = buildings[_blueprintId];
 
         // Make sure constructingisn't Constructing, or in the middle of a blueprinting cooldown
-        require(_isReadyToBreed(blueprint));
+        require(_isReadyToConstruct(_blueprintId));
 
-        // Test that these buildings are a valid mating pair.
-        require(_isValidMatingPair(
+        // Test that these buildings are a valid constructing pair.
+        require(_isValidConstructingPair(
             constructing,
             _constructingId,
-            blueprint,
+            blueprinting,
             _blueprintId
         ));
 
         // All checks passed, Building gets Constructing!
-        _breedWith(_constructingId, _blueprintId);
+        _constructWith(_constructingId, _blueprintId);
     }
 
     /// @notice Have a Constructing Building blueprinting!
@@ -963,12 +963,12 @@ contract BuildingBlueprinting is BuildingOwnership {
 
         // Determine the higher era number of the two parents
         uint16 parentGen = constructing.era;
-        if (blueprint.era > constructing.era) {
-            parentGen = blueprint.era;
+        if (blueprintId.era > constructing.era) {
+            parentGen = blueprintId.era;
         }
 
         // Call the sooper-sekret gene mixing operation.
-        uint256 childDNA = BuildingFormula.mixDNA(constructing.DNA, blueprint.DNA, constructing.cooldownEndBlock - 1);
+        uint256 childDNA = Building.Constructing(constructing.DNA, blueprintId.DNA, constructing.cooldownEndBlock - 1);
 
         // Make the new building!
         address owner = buildingIndexToOwner[_constructingId];
@@ -1248,7 +1248,7 @@ contract Pausable is Ownable {
   }
 
   // @dev called by the owner to pause, triggers stopped state
-  function pause() onlyOwner whenNotPaused returns (bool) {
+  function pause() onlyOwner public whenNotPaused returns (bool) {
     paused = true;
     Pause();
     return true;
@@ -1257,7 +1257,7 @@ contract Pausable is Ownable {
   /**
    * @dev called by the owner to unpause, returns to normal state
    */
-  function unpause() onlyOwner whenPaused returns (bool) {
+  function unpause() onlyOwner public whenPaused returns (bool) {
     paused = false;
     Unpause();
     return true;
@@ -1634,7 +1634,7 @@ contract BuildingAuction is BuildingBlueprinting {
         // Auction contract checks input sizes
         // If Building is already on any auction, this will throw because it will be owned by the auction contract.
         require(_owns(msg.sender, _buildingId));
-        require(isReadyToBreed(_buildingId));
+        require(isReadyToConstruct(_buildingId));
         _approve(_buildingId, blueprintingAuction);
         // blueprinting auction throws if inputs are invalid and clears
         // transfer and constructingapproval after escrowing the Building.
@@ -1649,11 +1649,11 @@ contract BuildingAuction is BuildingBlueprinting {
 
     /// @dev Completes a blueprinting auction by bidding.
     ///  Immediately breeds the winning constructing with the building2 on auction.
-    /// @param _blueprint2Id - ID of the building2 on auction.
-    /// @param _blueprint1Id - ID of the constructing owned by the bidder.
+    /// @param _blueprintId - ID of the building2 on auction.
+    /// @param _constructingId - ID of the constructing owned by the bidder.
     function bidOnBlueprintingAuction(
-        uint256 _blueprint2Id,
-        uint256 _blueprint1Id
+        uint256 _blueprintId,
+        uint256 _constructingId
     )
         external
         payable
@@ -1661,8 +1661,8 @@ contract BuildingAuction is BuildingBlueprinting {
     {
         // Auction contract checks input sizes
         require(_owns(msg.sender, _constructingId));
-        require(isReadyToBreed(_constructingId));
-        require(_canBreedWithViaAuction(_constructingId, _blueprintId));
+        require(isReadyToConstruct(_constructingId));
+        require(_canconstructWithViaAuction(_constructingId, _blueprintId));
 
         // Define the current price of the auction.
         uint256 currentPrice = blueprintingAuction.getCurrentPrice(_blueprintId);
@@ -1670,7 +1670,7 @@ contract BuildingAuction is BuildingBlueprinting {
 
         // blueprinting auction will throw if the bid fails.
         blueprintingAuction.bid.value(msg.value - autoBirthFee)(_blueprintId);
-        _breedWith(uint32(_constructingId), uint32(_blueprintId));
+        _constructWith(uint32(_constructingId), uint32(_blueprintId));
     }
 
     /// @dev Transfers the balance of the sale auction contract
@@ -1775,7 +1775,7 @@ contract BuildingCore is BuildingMinting {
     //      - buildingOwnership: This provides the methods required for basic non-fungible token
     //             transactions, following the draft ERC-721 spec (https://github.com/ethereum/EIPs/issues/721).
     //
-    //      - BuildingBreeding: This file contains the methods necessary to breed buildings together, including
+    //      - Buildingblueprinting: This file contains the methods necessary to breed buildings together, including
     //             keeping track of blueprinting offers, and relies on an external genetic combination contract.
     //
     //      - BuildingAuctions: Here we have the public methods for auctioning or bidding on buildings or blueprinting
@@ -1832,21 +1832,21 @@ contract BuildingCore is BuildingMinting {
         external
         view
         returns (
-        bool isGestating,
+        bool isConstructing,
         bool isReady,
         uint256 cooldownIndex,
         uint256 nextActionAt,
         uint256 blueprintingWithId,
         uint256 constructTime,
-        uint256 blueprint1Id,
-        uint256 blueprint2Id,
+        uint256 constructingId,
+        uint256 blueprintId,
         uint256 era,
         uint256 DNA
     ) {
         Building storage built = Buildings[_id];
 
         // if this variable is 0 then it's not gestating
-        isGestating = (built.blueprintingWithId != 0);
+        isConstructing = (built.blueprintingWithId != 0);
         isReady = (built.cooldownEndBlock <= block.number);
         cooldownIndex = uint256(built.cooldownIndex);
         nextActionAt = uint256(built.cooldownEndBlock);
