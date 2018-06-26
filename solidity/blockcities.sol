@@ -74,8 +74,6 @@ contract BlueprintFormula {
     function mixBlueprints(uint256 blueprint1, uint256 blueprint2, uint256 targetBlock) public returns (uint256);
 }
 
-}
-
 /// @title A facet of BuildingCore that manages special access privileges.
 /// @dev See the BuildingCore contract documentation to understand how the various contract facets are arranged.
 contract BuildingAccessControl {
@@ -188,7 +186,7 @@ contract BuildingAccessControl {
         // can't unpause if contract was upgraded
         paused = false;
     }
-
+}
 /// @title Blockcities basic contract containing the main structs, events, etc.
 /// @author Credits to Axiom Zen (https://www.axiomzen.co), Opensea, and OpenZeppelin 
 /// @dev See the BuildingCore contract documentation to understand how the various contract facets are arranged.
@@ -197,7 +195,7 @@ contract BuildingBase is BuildingAccessControl {
 
     /// @dev The Build event occurs either by "construction" by 2 mating buildings, or when era0 buildings are minted.
     ///  when a new era0 building is created.
-    event Build(address owner, uint256 buildingId, uint256 blueprint1Id, uint256 blueprint2Id, uint256 DNA);
+    event Build(address owner, uint256 buildingId, uint256 blueprintId, uint256 constructingId, uint256 DNA);
 
     /// @dev Transfer event as defined in current draft of ERC721. Emitted every time a building
     ///  ownership is assigned, including births.
@@ -220,8 +218,8 @@ contract BuildingBase is BuildingAccessControl {
         // Note that using 32-bit unsigned integers limits us to a "mere" 4 billion buildings. This number might seem small until you realize
         // that Ethereum currently has a limit of about 500 million
         // transactions per year! We can revisit this when we have enough buildings to worry about this.
-        uint32 blueprint1Id;
-        uint32 blueprint2Id;
+        uint32 blueprintId;
+        uint32 constructingId;
         // Set to the ID of blueprint2ID when blueprint1ID is building the building. Used to gather traits from both "parents"
         uint32 blueprintingWithId;
 
@@ -321,7 +319,7 @@ contract BuildingBase is BuildingAccessControl {
         uint256 _blueprint2Id,
         uint256 _era,
         uint256 _DNA,
-        address _owner,
+        address _owner
     )
         internal
         returns (uint)
@@ -538,7 +536,7 @@ contract BuildingOwnership is BuildingBase, ERC721 {
     function transferFrom(
         address _from,
         address _to,
-        uint256 _tokenId,
+        uint256 _tokenId
     )
         external
         whenNotPaused
