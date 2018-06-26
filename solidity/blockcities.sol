@@ -315,8 +315,8 @@ contract BuildingBase is BuildingAccessControl {
     /// @param _DNA The building's genetic code.
     /// @param _owner The inital owner of this building, must be non-zero, save for the very first building
     function _createBuilding(
-        uint256 _blueprint1Id,
-        uint256 _blueprint2Id,
+        uint256 _constructingId,
+        uint256 _blueprintId,
         uint256 _era,
         uint256 _DNA,
         address _owner
@@ -356,7 +356,7 @@ contract BuildingBase is BuildingAccessControl {
         require(newBuildingId == uint256(uint32(newBuildingId)));
 
         // emit the birth event
-        Birth(
+        Build(
             _owner,
             newBuildingId,
             uint256(_Building.constructingId),
@@ -676,17 +676,17 @@ contract BuildingBlueprinting is BuildingOwnership {
     uint256 public ConstructingBuildings;
 
     /// @dev The address of the sibling contract that is used to implement the sooper-sekret genetic combination algorithm.
-    DnaScienceInterface public DnaScience;
+    BlueprintFormula public BuildingFomula;
 
     /// @dev Update the address of the genetic contract, can only be called by the CEO.
-    /// @param _address An address of a DnaScience contract instance to be used from this point forward.
-    function setDnaScienceAddress(address _address) external onlyCEO {
-        DnaScienceInterface candidateContract = DnaScienceInterface(_address);
+    /// @param _address An address of a BuildingFormula contract instance to be used from this point forward.
+    function setBuildingFormulaAddress(address _address) external onlyCEO {
+        BuildingFormulaInterface candidateContract = BuildingFormulaInterface(_address);
 
         // NOTE: verify that a contract is what we expect - https://github.com/Lunyr/crowdsale-contracts/blob/cfadd15986c30521d8ba7d5b6f57b4fefcc7ac38/contracts/LunyrToken.sol#L117
-        require(candidateContract.isDnaScience());
+        require(candidateContract.isBuildingFormula());
         // Set the new contract address
-        DnaScience = candidateContract;
+        BuildingFormula = candidateContract;
     }
 
     /// @dev Checks that a given Building is able to breed. Requires that the
@@ -782,9 +782,9 @@ contract BuildingBlueprinting is BuildingOwnership {
     /// @param _building A reference to the Building struct of the potential blueprint.
     /// @param _blueprintId The blueprint's ID
     function _isValidMatingPair(
-        Building storage _blueprint1,
+        Building storage _constructing,
         uint256 _constructingId,
-        Building storage _blueprint2,
+        Building storage _blueprint,
         uint256 _blueprintId
     )
         private
@@ -968,7 +968,7 @@ contract BuildingBlueprinting is BuildingOwnership {
         }
 
         // Call the sooper-sekret gene mixing operation.
-        uint256 childDNA = DnaScience.mixDNA(constructing.DNA, blueprint.DNA, constructing.cooldownEndBlock - 1);
+        uint256 childDNA = BuildingFormula.mixDNA(constructing.DNA, blueprint.DNA, constructing.cooldownEndBlock - 1);
 
         // Make the new building!
         address owner = buildingIndexToOwner[_constructingId];
@@ -1866,7 +1866,7 @@ contract BuildingCore is BuildingMinting {
     function unpause() public onlyCEO whenPaused {
         require(saleAuction != address(0));
         require(blueprintingAuction != address(0));
-        require(DnaScience != address(0));
+        require(BuildingFormula != address(0));
         require(newContractAddress == address(0));
 
         // Actually unpause the contract.
