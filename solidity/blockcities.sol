@@ -687,7 +687,7 @@ contract BuildingBlueprinting is BuildingOwnership {
         // NOTE: verify that a contract is what we expect - https://github.com/Lunyr/crowdsale-contracts/blob/cfadd15986c30521d8ba7d5b6f57b4fefcc7ac38/contracts/LunyrToken.sol#L117
         require(candidateContract.isBlueprintPlan());
         // Set the new contract address
-        BuildingInfo = candidateContract;
+        BlueprintInfo = candidateContract;
     }
 
     /// @dev Checks that a given Building is able to breed. Requires that the
@@ -921,8 +921,8 @@ contract BuildingBlueprinting is BuildingOwnership {
         // Grab a reference to the potential blueprint
         Building storage blueprinting = buildings[_blueprintId];
 
-        // Make sure constructingisn't Constructing, or in the middle of a blueprinting cooldown
-        require(_isReadyToConstruct(_blueprintId));
+        // Make sure constructing isn't Constructing, or in the middle of a blueprinting cooldown
+        require(_isReadyToGiveBirth(buildings[_blueprintId]));
 
         // Test that these buildings are a valid constructing pair.
         require(_isValidConstructingPair(
@@ -1867,7 +1867,7 @@ contract BuildingCore is BuildingMinting {
     function unpause() public onlyCEO whenPaused {
         require(saleAuction != address(0));
         require(blueprintingAuction != address(0));
-        require(BuildingFormula != address(0));
+        require(BlueprintInfo != address(0));
         require(newContractAddress == address(0));
 
         // Actually unpause the contract.
